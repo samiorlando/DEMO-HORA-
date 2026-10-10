@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Salida de Carros - HUAYRURO PATA A PANCHA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Arial', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @media print {
+      #login-screen, .no-print {
+        display: none !important;
+      }
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      #app-content {
+        display: block !important;
+      }
+      .print-area {
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
+      th, td {
+        border: 1.5px solid #000 !important;
+        color: #000 !important;
+        padding: 3px 4px !important;
+      }
+      input {
+        border: none !important;
+        background: transparent !important;
+        font-weight: 700 !important;
+        color: #000 !important;
+        font-size: 11px !important;
+      }
+    }
+
+    .huayruro-glow {
+      background-color: #fca5a5 !important; /* bg-red-300 */
+      animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      transition: background-color 0.3s ease;
+      color: #7f1d1d !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen font-sans flex flex-col justify-between">
+
+  <!-- ================= PANTALLA DE LOGIN ================= -->
+  <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4 transition-opacity duration-300">
+    <div class="bg-white border-2 border-slate-900 rounded-3xl shadow-2xl p-7 sm:p-9 max-w-md w-full relative overflow-hidden">
+      
+      <!-- Decoración superior -->
+      <div class="h-2 bg-gradient-to-r from-amber-500 via-black to-blue-600 absolute top-0 left-0 right-0"></div>
+
+      <div class="text-center mb-6 pt-2">
+        <div class="w-16 h-16 bg-black text-white text-3xl rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-black/20">
+          🚍
+        </div>
+        <h2 class="text-2xl font-black uppercase text-black tracking-tight">Acceso Operativo</h2>
+        <p class="text-xs text-slate-500 font-bold mt-1">Control de Salida de Carros • Huayruro Pata a Pancha</p>
+      </div>
+
+      <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1" for="username">
+            Usuario
+          </label>
+          <div class="relative">
+            <input 
+              type="text" 
+              id="username" 
+              required
+              autocomplete="username"
+              placeholder="Ingresa tu usuario" 
+              class="w-full bg-slate-50 border-2 border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-black font-bold focus:outline-none focus:border-black focus:bg-white transition"
+            >
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1" for="password">
+            Contraseña
+          </label>
+          <div class="relative">
+            <input 
+              type="password" 
+              id="password" 
+              required
+              autocomplete="current-password"
+              placeholder="••••••••" 
+              class="w-full bg-slate-50 border-2 border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-black font-bold focus:outline-none focus:border-black focus:bg-white transition"
+            >
+          </div>
+        </div>
+
+        <!-- Mensaje de error -->
+        <div id="login-error" class="hidden text-center text-xs font-black text-rose-600 bg-rose-50 border border-rose-200 py-2 rounded-xl">
+          ⚠️ Usuario o contraseña incorrectos
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full bg-black hover:bg-zinc-800 text-white font-black text-sm uppercase tracking-wider py-3 rounded-xl transition shadow-lg active:scale-[0.98] mt-2 flex items-center justify-center gap-2"
+        >
+          <span>Ingresar al Sistema</span>
+          <span>→</span>
+        </button>
+
+        <div class="text-center pt-2">
+          <p class="text-[11px] text-slate-400 font-semibold">Credenciales del sistema: <span class="font-mono text-slate-600 font-bold">admin / admin</span></p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <div id="app-content" class="hidden flex-col min-h-screen justify-between">
+    <header class="bg-white border-b-2 border-slate-300 shadow-sm sticky top-0 z-40 no-print">
+      <div class="max-w-[1600px] mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+        
+        <div class="flex items-center gap-3">
+          <div class="bg-black text-white px-3.5 py-1.5 rounded-xl font-black text-lg tracking-wider shadow">
+            RUTA 🚌
+          </div>
+          <div>
+            <h1 class="text-base sm:text-lg font-black uppercase tracking-tight text-black">
+              Planilla de Control y Salida de Carros
+            </h1>
+            <p class="text-xs text-slate-600 font-semibold">
+              Huayruro Pata • Manzana Pata • Arco • Pancha | Suma Trayecto: <span class="bg-amber-100 text-amber-900 px-1 rounded font-bold">18 + 19 + 18 = +55 min</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Selector de Hoja de Horario y Buscador -->
+        <div class="flex flex-wrap items-center gap-2 bg-slate-50 border border-slate-300 p-2 rounded-xl text-xs font-bold">
+          <span class="text-slate-700">Frecuencia Base:</span>
+          <select id="freq-mode" onchange="changeScheduleMode()" class="bg-white border border-slate-400 rounded-lg px-2.5 py-1.5 text-black font-extrabold focus:outline-none focus:ring-2 focus:ring-black">
+            <option value="sheet3" selected>Hoja 3: 18 min + Bloque 12 min (12:00 a 14:00)</option>
+            <option value="sheet1">Hoja 1: Cada 18 minutos</option>
+            <option value="sheet2">Hoja 2: Cada 19 minutos</option>
+          </select>
+
+          <span class="text-slate-700 ml-1 sm:ml-2">Duración:</span>
+          <select id="duration-mode" onchange="changeScheduleMode()" class="bg-white border border-slate-400 rounded-lg px-2.5 py-1.5 text-black font-extrabold focus:outline-none focus:ring-2 focus:ring-black">
+            <option value="12">12 Horas (06:00 - 18:00)</option>
+            <option value="24" selected>24 Horas (Todo el día)</option>
+          </select>
+
+          <div class="relative">
+            <input type="text" id="search-code" oninput="handleSearch()" placeholder="Buscar código de carro..." class="bg-white border border-slate-400 rounded-lg pl-7 pr-2.5 py-1.5 text-xs text-black uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-black w-44">
+            <span class="absolute left-2 top-1.5 text-slate-400 text-xs">🔍</span>
+          </div>
+
+          <div class="bg-black text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5">
+            <span>🕒</span> Reloj: <span id="clock-display" class="font-mono">--:--:--</span>
+          </div>
+        </div>
+
+        <!-- Acciones Rápidas & Cerrar Sesión -->
+        <div class="flex items-center gap-2">
+          <button onclick="startDay()" class="bg-blue-600 hover:bg-blue-700 text-white font-black text-xs px-3 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5">
+            ▶ Iniciar
+          </button>
+
+          <button onclick="window.print()" class="bg-white hover:bg-slate-100 text-black border-2 border-black font-extrabold text-xs px-3 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+            Imprimir
+          </button>
+
+          <button onclick="exportToCSV()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs px-3 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Excel / CSV
+          </button>
+
+          <button onclick="clearCurrentSheetData()" class="bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 font-extrabold text-xs px-2.5 py-2 rounded-xl transition">
+            Limpiar
+          </button>
+
+          <!-- Botón Cerrar Sesión -->
+          <button onclick="handleLogout()" class="bg-slate-900 hover:bg-black text-white font-black text-xs px-3 py-2 rounded-xl transition flex items-center gap-1.5 ml-1 shadow" title="Cerrar sesión de administrador">
+            <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            Salir
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+
+    <main class="max-w-[1600px] mx-auto p-3 sm:p-6 w-full flex-1">
+      
+      <div class="print-area bg-white border-2 border-slate-300 rounded-2xl shadow-xl overflow-hidden p-4 sm:p-6">
+
+        <!-- ENCABEZADO IDÉNTICO AL CARTEL DE LA IMAGEN DE REFERENCIA -->
+        <div class="border-b-4 border-black pb-4 mb-4">
+          
+          <div class="grid grid-cols-12 gap-2 text-black items-end text-center uppercase">
+            
+            <!-- DATOS DEL VEHÍCULO -->
+            <div class="col-span-2 hidden md:flex flex-col justify-end text-left pr-2 border-r-2 border-black/30">
+              <span class="text-[10px] text-slate-500 font-black">CONTROL DE SALIDA</span>
+              <span class="text-sm font-black tracking-tight">CÓDIGO Y CONDUCTOR</span>
+            </div>
+
+            <!-- 1. HUAYRURO PATA -->
+            <div class="col-span-3 md:col-span-2 px-1">
+              <h2 class="text-base sm:text-xl lg:text-2xl font-black tracking-tight leading-none">
+                HUAYRURO PATA
+              </h2>
+              <div class="text-[10px] sm:text-xs font-black tracking-widest mt-1 text-slate-800">
+                HORA &nbsp; MINUTO
+              </div>
+              <div class="text-[10px] font-bold text-slate-500 uppercase mt-0.5">
+                (SALIDA BASE)
+              </div>
+            </div>
+
+            <!-- 2. MANZANA PATA -->
+            <div class="col-span-4 md:col-span-3 px-1 border-x-2 border-black/20">
+              <h2 class="text-base sm:text-xl lg:text-2xl font-black tracking-tight leading-none">
+                MANZANA PATA
+              </h2>
+              <div class="grid grid-cols-2 gap-1 mt-1">
+                <div>
+                  <div class="text-[9px] sm:text-[11px] font-black text-slate-900 leading-tight">
+                    HORA MINUTO
+                  </div>
+                  <div class="text-[9px] sm:text-[10px] font-extrabold bg-black text-white px-1 py-0.5 rounded mt-0.5">
+                    CADA 12 MINUTOS
+                  </div>
+                </div>
+                <div>
+                  <div class="text-[9px] sm:text-[11px] font-black text-slate-900 leading-tight">
+                    HORA MINUTO
+                  </div>
+                  <div class="text-[9px] sm:text-[10px] font-extrabold bg-zinc-800 text-white px-1 py-0.5 rounded mt-0.5">
+                    MAS 6 MINUTOS
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. ARCO -->
+            <div class="col-span-2 sm:col-span-2 px-1 border-r-2 border-black/20">
+              <h2 class="text-base sm:text-xl lg:text-2xl font-black tracking-tight leading-none">
+                ARCO
+              </h2>
+              <div class="text-[9px] sm:text-[11px] font-black text-slate-900 leading-tight mt-1">
+                HORA &nbsp; MINUTO
+              </div>
+              <div class="text-[9px] sm:text-[10px] font-extrabold bg-black text-white px-1 py-0.5 rounded mt-0.5">
+                CADA 19 MINUTOS
+              </div>
+            </div>
+
+            <!-- 4. PANCHA -->
+            <div class="col-span-3 md:col-span-3 px-1">
+              <h2 class="text-base sm:text-xl lg:text-2xl font-black tracking-tight leading-none">
+                PANCHA
+              </h2>
+              <div class="text-[9px] sm:text-[11px] font-black text-slate-900 leading-tight mt-1">
+                HORA &nbsp; MINUTO
+              </div>
+              <div class="text-[9px] sm:text-[10px] font-extrabold bg-black text-white px-1 py-0.5 rounded mt-0.5">
+                CADA 18 MINUTOS
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse" id="route-table">
+            <thead>
+              <tr class="bg-black text-white font-mono text-[11px] tracking-wider uppercase">
+                <th class="py-2.5 px-2 text-center w-10 border border-black">#</th>
+                <th class="py-2.5 px-2 w-32 border border-black bg-zinc-900 text-amber-300 font-black">
+                  CÓDIGO DE CARRO
+                </th>
+                <th class="py-2.5 px-2 w-32 border border-black">Conductor</th>
+                
+                <!-- Puntos de Control Programados -->
+                <th class="py-2.5 px-3 text-center font-black bg-zinc-900 text-yellow-300 border border-black">
+                  HUAYRURO PATA<br><span class="text-[9px] text-zinc-300 font-sans font-normal">(Salida Base)</span>
+                </th>
+                
+                <th class="py-2.5 px-3 text-center font-black border border-black bg-zinc-800">
+                  MANZANA PATA<br><span class="text-[9px] text-zinc-300 font-sans font-normal">(+12 min)</span>
+                </th>
+                
+                <th class="py-2.5 px-3 text-center font-black border border-black bg-zinc-800">
+                  MANZANA PATA<br><span class="text-[9px] text-zinc-300 font-sans font-normal">(+6 min)</span>
+                </th>
+                
+                <th class="py-2.5 px-3 text-center font-black border border-black bg-zinc-900">
+                  ARCO<br><span class="text-[9px] text-zinc-300 font-sans font-normal">(+19 min)</span>
+                </th>
+                
+                <th class="py-2.5 px-3 text-center font-black border border-black bg-zinc-900">
+                  PANCHA<br><span class="text-[9px] text-zinc-300 font-sans font-normal">(+18 min)</span>
+                </th>
+
+                <!-- Acciones y Registro -->
+                <th class="py-2.5 px-2 text-center w-24 border border-black no-print">Acción</th>
+                <th class="py-2.5 px-2 text-center w-28 border border-black bg-slate-900 text-white">Editar Hora Real</th>
+                
+                <!-- Columna con la SUMA TOTAL REAL (18+19+18 = +55m) -->
+                <th class="py-2.5 px-3 text-center w-64 border border-black bg-amber-500 text-black font-black">
+                  LLEGADA
+                </th>
+              </tr>
+            </thead>
+            <tbody id="table-body" class="divide-y divide-black/20 font-sans font-semibold">
+              <!-- Filas dinámicas generadas en JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-300 py-3 text-center text-xs text-slate-600 font-bold no-print">
+      Control de Salida de Carros • Sesión: <span class="text-black font-mono">admin</span> • Suma de ruta 18 + 19 + 18 = 55 min • Guardado automático en este equipo.
+    </footer>
+  </div>
+
+  <!-- NOTIFICACIÓN FLOTANTE -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-black text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none text-xs font-bold">
+    <span id="toast-icon">✅</span>
+    <span id="toast-message">Guardado</span>
+  </div>
+
+
+  <script>
+    const STORAGE_KEY = 'control_ruta_imagen_referencia_v4';
+    const SESSION_AUTH_KEY = 'sesion_admin_activa_v1';
+    let currentScheduleMode = 'sheet3';
+    let routeRows = [];
+    
+    // Suma requerida del trayecto: 18 + 19 + 18 = 55 minutos
+    const SUMA_MINUTOS_RUTA = 18 + 19 + 18; // 55 min
+
+    // ================= AUTENTICACIÓN =================
+    function checkAuthentication() {
+      const isLogged = sessionStorage.getItem(SESSION_AUTH_KEY);
+      const loginScreen = document.getElementById('login-screen');
+      const appContent = document.getElementById('app-content');
+
+      if (isLogged === 'true') {
+        loginScreen.classList.add('hidden');
+        appContent.classList.remove('hidden');
+        appContent.classList.add('flex');
+        generateSchedule();
+        initClock();
+      } else {
+        loginScreen.classList.remove('hidden');
+        appContent.classList.add('hidden');
+        appContent.classList.remove('flex');
+        setTimeout(() => {
+          document.getElementById('username')?.focus();
+        }, 100);
+      }
+    }
+
+    function handleLogin(event) {
+      event.preventDefault();
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value.trim();
+      const errorMsg = document.getElementById('login-error');
+
+      if (user === 'admin' && pass === 'admin') {
+        errorMsg.classList.add('hidden');
+        sessionStorage.setItem(SESSION_AUTH_KEY, 'true');
+        checkAuthentication();
+        showToast("Bienvenido, Administrador", "👋");
+      } else {
+        errorMsg.classList.remove('hidden');
+        document.getElementById('password').value = '';
+        document.getElementById('password').focus();
+      }
+    }
+
+    function handleLogout() {
+      if (confirm("¿Deseas cerrar la sesión de administración?")) {
+        sessionStorage.removeItem(SESSION_AUTH_KEY);
+        document.getElementById('password').value = '';
+        checkAuthentication();
+      }
+    }
+
+
+    // Helper: Minutos a HH:MM
+    function minToHHMM(minutes) {
+      const normalized = ((minutes % 1440) + 1440) % 1440;
+      const h = Math.floor(normalized / 60);
+      const m = normalized % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+
+    // Helper: HH:MM a minutos totales
+    function hhmmToMin(timeStr) {
+      if (!timeStr) return 0;
+      const parts = timeStr.split(':').map(Number);
+      return (parts[0] * 60) + parts[1];
+    }
+
+    // Iniciar el día en el momento exacto
+    function startDay() {
+      if (confirm("¿Deseas iniciar la planilla ahora? El horario del primer carro comenzará en la hora actual.")) {
+        const now = new Date();
+        const startMin = now.getHours() * 60 + now.getMinutes();
+        localStorage.setItem('dayStartTime', startMin);
+        generateSchedule();
+        showToast("Día Iniciado", "▶");
+      }
+    }
+
+    // Generar itinerario según el modo seleccionado
+    function generateSchedule() {
+      const mode = currentScheduleMode;
+      const durationMode = document.getElementById('duration-mode')?.value || "24";
+      const rows = [];
+      const tbody = document.getElementById('table-body');
+      
+      const savedStart = localStorage.getItem('dayStartTime');
+      if (!savedStart) {
+        if (tbody) {
+          tbody.innerHTML = `<tr><td colspan="12" class="py-10 text-center text-slate-500 font-bold bg-white text-base">La planilla no ha comenzado.<br>Haz clic en el botón azul <span class="bg-blue-600 text-white px-2 py-1 rounded">▶ Iniciar</span> arriba para generar los horarios desde la hora actual.</td></tr>`;
+        }
+        routeRows = [];
+        return;
+      }
+
+      let startTime = parseInt(savedStart, 10);
+      let endTime = startTime + (durationMode === "12" ? 12 * 60 : 24 * 60) - 1;
+      
+      let index = 1;
+
+      // Cargar datos previos guardados para este modo
+      const allSaved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const savedModeData = allSaved[mode] || {};
+
+      while (startTime <= endTime) {
+        // Puntos de control según la imagen de referencia:
+        // 1. Huayruro Pata: Salida base
+        // 2. Manzana Pata 1: +12 minutos
+        // 3. Manzana Pata 2: +6 minutos
+        // 4. Arco: +19 minutos
+        // 5. Pancha: +18 minutos
+        const tHuayruro = startTime;
+        const tManzana1 = tHuayruro + 12;
+        const tManzana2 = tManzana1 + 6;
+        const tArco = tManzana2 + 19;
+        const tPancha = tArco + 18;
+
+        const rowKey = `row_${index}`;
+        const previous = savedModeData[rowKey] || {};
+
+        rows.push({
+          id: index,
+          huayruro: minToHHMM(tHuayruro),
+          manzana1: minToHHMM(tManzana1),
+          manzana2: minToHHMM(tManzana2),
+          arco: minToHHMM(tArco),
+          pancha: minToHHMM(tPancha),
+          unit: previous.unit || '', // Representa el Código de Carro
+          driver: previous.driver || '',
+          realTime: previous.realTime || ''
+        });
+
+        // Avance según la frecuencia de la hoja seleccionada
+        if (mode === 'sheet1') {
+          // Cada 18 minutos
+          startTime += 18;
+        } else if (mode === 'sheet2') {
+          // Cada 19 minutos
+          startTime += 19;
+        } else if (mode === 'sheet3') {
+          // Hoja 3: 18 min, bloque de 12 min de 12:00 a 14:00, luego 18 min
+          if (startTime >= 12 * 60 && startTime < 14 * 60) {
+            startTime += 12;
+          } else if (startTime < 12 * 60) {
+            const next = startTime + 18;
+            if (next > 12 * 60 && (next - 12 * 60) < 10) {
+              startTime = 12 * 60; // ajustar exacto a las 12:00
+            } else {
+              startTime = next;
+            }
+          } else {
+            startTime += 18;
+          }
+        }
+
+        index++;
+      }
+
+      routeRows = rows;
+      renderTable();
+    }
+
+
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      const searchQuery = (document.getElementById('search-code')?.value || '').toLowerCase().trim();
+
+      routeRows.forEach((r, idx) => {
+        // Filtrar por Código de Carro o Conductor
+        if (searchQuery) {
+          const matchCode = (r.unit || '').toLowerCase().includes(searchQuery);
+          const matchDriver = (r.driver || '').toLowerCase().includes(searchQuery);
+          if (!matchCode && !matchDriver) return;
+        }
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-amber-50/70 transition-colors border-b border-black/20 text-center";
+
+        // Contenido de la columna con la suma 18+19+18 = 55 minutos a partir de la HORA REAL
+        let realAndDiffHtml = `<span class="text-slate-400 font-mono text-xs italic">Pendiente de salida</span>`;
+
+        if (r.realTime) {
+          const progMin = hhmmToMin(r.huayruro);
+          const realMin = hhmmToMin(r.realTime);
+          const diff = realMin - progMin;
+
+          // Cálculo: Hora Real de Salida + 55 min (18 + 19 + 18)
+          const realArrivalMin = realMin + SUMA_MINUTOS_RUTA;
+          const realArrivalStr = minToHHMM(realArrivalMin);
+
+          let badgeColor = '';
+          let badgeText = '';
+
+          if (diff === 0) {
+            badgeColor = 'bg-emerald-600 text-white';
+            badgeText = 'A TIEMPO';
+          } else if (diff > 0) {
+            badgeColor = diff > 4 ? 'bg-rose-600 text-white' : 'bg-amber-600 text-white';
+            badgeText = `+${diff}m TARDE`;
+          } else {
+            badgeColor = 'bg-blue-600 text-white';
+            badgeText = `${Math.abs(diff)}m ANTES`;
+          }
+
+          realAndDiffHtml = `
+            <div class="flex items-center justify-center py-1">
+              <span class="font-mono font-black text-base sm:text-lg text-amber-950 bg-amber-200 border-2 border-amber-600 px-3 py-1 rounded-xl shadow-md" title="Hora Real de Llegada (+55 min)">
+                ${realArrivalStr}
+              </span>
+            </div>
+          `;
+        }
+
+        tr.innerHTML = `
+          <td class="py-2.5 px-1 font-mono font-black border border-black/40 bg-slate-50">${r.id}</td>
+          
+          <!-- CÓDIGO DE CARRO -->
+          <td class="py-1 px-1 border border-black/40 bg-amber-50/30">
+            <input type="text" value="${r.unit}" onchange="updateRowField(${idx}, 'unit', this.value)" placeholder="CÓDIGO CARRO" class="w-full text-center uppercase font-mono font-black text-black bg-transparent border-0 focus:ring-1 focus:ring-black rounded text-xs tracking-wider">
+          </td>
+
+          <!-- Conductor -->
+          <td class="py-1 px-1 border border-black/40 relative ${r.realTime ? 'bg-red-200 animate-pulse' : ''}">
+            <input type="text" value="${r.driver}" onchange="updateRowField(${idx}, 'driver', this.value)" placeholder="CHOFER" class="w-full text-left font-bold text-black bg-transparent border-0 focus:ring-1 focus:ring-black rounded text-xs uppercase px-1">
+            ${r.realTime ? `<div class="text-[9px] font-black text-red-800 mt-0.5 flex items-center justify-start gap-1 px-1"><span class="w-1.5 h-1.5 rounded-full bg-red-600 shadow-[0_0_6px_#dc2626]"></span>EN CAMINO</div>` : ''}
+          </td>
+
+          <!-- 1. HUAYRURO PATA (Salida) -->
+          <td class="huayruro-time-cell py-2 px-2 font-mono font-black text-sm lg:text-base border border-black/40 bg-yellow-50 hover:bg-yellow-200 text-black transition-colors cursor-pointer" data-time="${r.huayruro}" onclick="stampRowNow(${idx})" title="Clic para marcar salida real">
+            ${r.realTime ? `<div class="text-red-600">${r.realTime}</div><div class="text-[10px] text-slate-500 font-bold leading-none">Prog: ${r.huayruro}</div>` : r.huayruro}
+          </td>
+
+          <!-- 2. MANZANA PATA (+12 min) -->
+          <td class="py-2 px-2 font-mono font-black text-sm lg:text-base border border-black/40 bg-zinc-50 text-slate-900">
+            ${r.manzana1}
+          </td>
+
+          <!-- 2. MANZANA PATA (+6 min) -->
+          <td class="py-2 px-2 font-mono font-black text-sm lg:text-base border border-black/40 bg-zinc-50 text-slate-900">
+            ${r.manzana2}
+          </td>
+
+          <!-- 3. ARCO (+19 min) -->
+          <td class="py-2 px-2 font-mono font-black text-sm lg:text-base border border-black/40 bg-yellow-50/50 text-black">
+            ${r.arco}
+          </td>
+
+          <!-- 4. PANCHA (+18 min) -->
+          <td class="py-2 px-2 font-mono font-black text-sm lg:text-base border border-black/40 bg-yellow-50/50 text-black">
+            ${r.pancha}
+          </td>
+
+          <!-- Botón de Registro Rápido -->
+          <td class="py-1 px-1 border border-black/40 no-print">
+            <button onclick="stampRowNow(${idx})" class="w-full bg-black hover:bg-zinc-800 text-white font-black text-[11px] py-1.5 px-1 rounded transition active:scale-95 shadow">
+              ⚡ Marcar
+            </button>
+          </td>
+
+          <!-- Campo Input Hora Real (Editable) -->
+          <td class="py-1 px-1 border border-black/40 bg-slate-50">
+            <input type="time" value="${r.realTime}" onchange="updateRowField(${idx}, 'realTime', this.value)" class="w-full text-center font-mono font-black text-xs sm:text-sm bg-white border border-slate-300 focus:ring-2 focus:ring-black rounded py-1 text-black">
+          </td>
+
+          <!-- Columna HORA REAL TOTAL (SUMA 18+19+18 = 55m) -->
+          <td class="py-1 px-2 border border-black/40 bg-amber-50/70">
+            ${realAndDiffHtml}
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateRowField(index, field, value) {
+      routeRows[index][field] = value;
+      saveCurrentState();
+      renderTable();
+    }
+
+    // Estampar hora actual en la fila
+    function stampRowNow(index) {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const timeStr = `${hh}:${mm}`;
+
+      routeRows[index].realTime = timeStr;
+      saveCurrentState();
+      renderTable();
+      showToast(`Salida #${routeRows[index].id} (Carro: ${routeRows[index].unit || 'S/N'}) despachada a las ${timeStr}`);
+    }
+
+    // Guardar en localStorage según el modo activo
+    function saveCurrentState() {
+      const allSaved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const modeData = {};
+
+      routeRows.forEach(r => {
+        modeData[`row_${r.id}`] = {
+          unit: r.unit,
+          driver: r.driver,
+          realTime: r.realTime
+        };
+      });
+
+      allSaved[currentScheduleMode] = modeData;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(allSaved));
+    }
+
+    function changeScheduleMode() {
+      currentScheduleMode = document.getElementById('freq-mode').value;
+      generateSchedule();
+    }
+
+    function handleSearch() {
+      renderTable();
+    }
+
+    function clearCurrentSheetData() {
+      if (confirm("¿Deseas borrar toda la hoja y reiniciar el horario de inicio?")) {
+        const allSaved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        delete allSaved[currentScheduleMode];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(allSaved));
+        localStorage.removeItem('dayStartTime');
+        generateSchedule();
+        showToast("Hoja reiniciada", "🧹");
+      }
+    }
+
+    function exportToCSV() {
+      let csv = "\uFEFF"; // UTF-8 BOM para soporte de caracteres en Excel
+      csv += "N° Salida;Código de Carro;Conductor;Huayruro Pata (Salida);Manzana Pata (+12m);Manzana Pata (+6m);Arco (+19m);Pancha (+18m);Hora Real Salida;Hora Real Llegada (+55m);Diferencia Minutos;Estado\n";
+
+      routeRows.forEach(r => {
+        let diffMinutes = "";
+        let arrivalReal = "";
+        let estado = "Pendiente";
+        if (r.realTime) {
+          const progMin = hhmmToMin(r.huayruro);
+          const realMin = hhmmToMin(r.realTime);
+          const diff = realMin - progMin;
+          diffMinutes = diff;
+          arrivalReal = minToHHMM(realMin + SUMA_MINUTOS_RUTA);
+          estado = diff === 0 ? "A tiempo" : (diff > 0 ? `+${diff} min tarde` : `${Math.abs(diff)} min antes`);
+        }
+
+        csv += `${r.id};"${r.unit}";"${r.driver}";${r.huayruro};${r.manzana1};${r.manzana2};${r.arco};${r.pancha};"${r.realTime}";"${arrivalReal}";${diffMinutes};"${estado}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Control_Salidas_CodigoCarro_${currentScheduleMode}_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("Descargando archivo CSV para Excel", "📥");
+    }
+
+
+    // Reloj digital en vivo
+    function initClock() {
+      const clockEl = document.getElementById('clock-display');
+      setInterval(() => {
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        if (clockEl) clockEl.textContent = `${hh}:${mm}:${ss}`;
+
+        // Resaltar casilla de HUAYRURO PATA si coincide con la hora actual
+        const currentHHMM = `${hh}:${mm}`;
+        document.querySelectorAll('.huayruro-time-cell').forEach(cell => {
+          if (cell.getAttribute('data-time') === currentHHMM) {
+            cell.classList.add('huayruro-glow');
+          } else {
+            cell.classList.remove('huayruro-glow');
+          }
+        });
+      }, 1000);
+    }
+
+    function showToast(msg, icon = "✅") {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-message').textContent = msg;
+      document.getElementById('toast-icon').textContent = icon;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 2300);
+    }
+
+    window.onload = function() {
+      checkAuthentication();
+    };
+  </script>
+</body>
+</html>
